@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-Order EGGSTRA</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background: #ffffff;
+            max-width: 480px;
+            width: 100%;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            text-align: center;
+            color: #d97706;
+            margin-bottom: 5px;
+            font-size: 1.6em;
+        }
+
+        p.subtitle {
+            text-align: center;
+            font-size: 0.88em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        /* Panel Admin */
+        .admin-panel {
+            background-color: #fffbeb;
+            border: 1px dashed #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .admin-title {
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #b45309;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .admin-grid div label {
+            font-size: 0.75em;
+            color: #78350f;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.9em;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.95em;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #d97706;
+        }
+
+        .item-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .item-title {
+            font-weight: bold;
+            font-size: 0.9em;
+            color: #1e293b;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Summary */
+        .summary-box {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 0.88em;
+        }
+
+        .summary-row.total {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #047857;
+            border-top: 1px solid #a7f3d0;
+            padding-top: 8px;
+            margin-top: 8px;
+            margin-bottom: 0;
+        }
+
+        .payment-info {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        button.btn-submit {
+            width: 100%;
+            background-color: #16a34a;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 1em;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button.btn-submit:hover {
+            background-color: #15803d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🥚 Pre-Order EGGSTRA</h2>
+    <p class="subtitle">Sistem PO: Isi Form → Transfer → Masuk List Kirim</p>
+
+    <!-- ADMIN PANEL -->
+    <div class="admin-panel">
+        <span class="admin-title">⚙️ SETTING HARGA HARI INI (PENJUAL):</span>
+        <div class="admin-grid">
+            <div>
+                <label for="hargaBiasa">Telur Biasa (/kg):</label>
+                <input type="number" id="hargaBiasa" value="28000" oninput="hitungTotal()">
+            </div>
+            <div>
+                <label for="hargaOmega">Telur Omega (/kg):</label>
+                <input type="number" id="hargaOmega" value="38000" oninput="hitungTotal()">
+            </div>
+        </div>
+    </div>
+
+    <!-- FORM PEMESANAN -->
+    <form id="poForm" onsubmit="kirimPesanan(event)">
+        <div class="form-group">
+            <label for="nama">Nama Pemesan:</label>
+            <input type="text" id="nama" required placeholder="Contoh: Budi">
+        </div>
+
+        <div class="form-group">
+            <label for="whatsapp">Nomor WhatsApp:</label>
+            <input type="tel" id="whatsapp" required placeholder="Contoh: 08123456789">
+        </div>
+
+        <!-- JUMLAH ORDER DUA JENIS TELUR -->
+        <div class="item-box">
+            <span class="item-title">🥚 Telur Ayam Biasa</span>
+            <label for="kgBiasa" style="font-size: 0.8em; color: #666;">Jumlah (Kg):</label>
+            <input type="number" id="kgBiasa" min="0" step="0.5" value="1" oninput="hitungTotal()">
+        </div>
+
+        <div class="item-box">
+            <span class="item-title">🍳 Telur Ayam Omega</span>
+            <label for="kgOmega" style="font-size: 0.8em; color: #666;">Jumlah (Kg):</label>
+            <input type="number" id="kgOmega" min="0" step="0.5" value="0" oninput="hitungTotal()">
+        </div>
+
+        <!-- RINGKASAN TOTAL -->
+        <div class="summary-box">
+            <div class="summary-row" id="rowBiasa">
+                <span>Telur Biasa:</span>
+                <span id="detailBiasa">0 Kg</span>
+            </div>
+            <div class="summary-row" id="rowOmega">
+                <span>Telur Omega:</span>
+                <span id="detailOmega">0 Kg</span>
+            </div>
+            <div class="summary-row total">
+                <span>Total Bayar:</span>
+                <span id="labelTotal">Rp 0</span>
+            </div>
+        </div>
+
+        <div class="payment-info">
+            <strong>⚠️ Ketentuan PO EGGSTRA:</strong><br>
+            Transfer ke rekening di bawah ini untuk konfirmasi pesanan:<br>
+            • <strong>BCA:</strong> 1234567890 a.n. Nisa Ruffaidah<br>
+            • <strong>Mandiri:</strong> 0987654321 a.n. Nisa Ruffaidah
+        </div>
+
+        <button type="submit" class="btn-submit">Kirim Pesanan via WhatsApp 🚀</button>
+    </form>
+</div>
+
+<script>
+    // Ganti nomor WhatsApp kamu di sini (Gunakan format 62)
+    const NOMOR_WA_PENJUAL = "6282118011169"; 
+
+    function formatRupiah(angka) {
+        return 'Rp ' + Number(angka).toLocaleString('id-ID');
+    }
+
+    function hitungTotal() {
+        const hgBiasa = parseFloat(document.getElementById('hargaBiasa').value) || 0;
+        const hgOmega = parseFloat(document.getElementById('hargaOmega').value) || 0;
+
+        const kgBiasa = parseFloat(document.getElementById('kgBiasa').value) || 0;
+        const kgOmega = parseFloat(document.getElementById('kgOmega').value) || 0;
+
+        const subtotalBiasa = hgBiasa * kgBiasa;
+        const subtotalOmega = hgOmega * kgOmega;
+        const grandTotal = subtotalBiasa + subtotalOmega;
+
+        document.getElementById('detailBiasa').innerText = `${kgBiasa} Kg (${formatRupiah(subtotalBiasa)})`;
+        document.getElementById('detailOmega').innerText = `${kgOmega} Kg (${formatRupiah(subtotalOmega)})`;
+        document.getElementById('labelTotal').innerText = formatRupiah(grandTotal);
+    }
+
+    function kirimPesanan(event) {
+        event.preventDefault();
+
+        const nama = document.getElementById('nama').value;
+        const wa = document.getElementById('whatsapp').value;
+
+        const hgBiasa = parseFloat(document.getElementById('hargaBiasa').value) || 0;
+        const hgOmega = parseFloat(document.getElementById('hargaOmega').value) || 0;
+        const kgBiasa = parseFloat(document.getElementById('kgBiasa').value) || 0;
+        const kgOmega = parseFloat(document.getElementById('kgOmega').value) || 0;
+
+        if (kgBiasa === 0 && kgOmega === 0) {
+            alert('Silakan isi jumlah pesanan minimal 0.5 Kg untuk salah satu jenis telur.');
+            return;
+        }
+
+        const subtotalBiasa = hgBiasa * kgBiasa;
+        const subtotalOmega = hgOmega * kgOmega;
+        const grandTotal = subtotalBiasa + subtotalOmega;
+
+        let rincianPesanan = '';
+        if (kgBiasa > 0) {
+            rincianPesanan += `• Telur Biasa: ${kgBiasa} Kg (@${formatRupiah(hgBiasa)}) = ${formatRupiah(subtotalBiasa)}%0A`;
+        }
+        if (kgOmega > 0) {
+            rincianPesanan += `• Telur Omega: ${kgOmega} Kg (@${formatRupiah(hgOmega)}) = ${formatRupiah(subtotalOmega)}%0A`;
+        }
+
+        const pesan = `Halo EGGSTRA, saya mau ikut PO Telur %0A%0A` +
+                      `*Data Pemesan:*%0A` +
+                      `• Nama: ${nama}%0A` +
+                      `• No WA: ${wa}%0A%0A` +
+                      `*Rincian Pesanan:*%0A` +
+                      `${rincianPesanan}%0A` +
+                      `*Total Bayar:* *${formatRupiah(grandTotal)}*%0A%0A` +
+                      `Mohon info detail pembayaran/rekening untuk konfirmasi pesanan ya! Terima kasih.`;
+
+        window.open(`https://wa.me/${NOMOR_WA_PENJUAL}?text=${pesan}`, '_blank');
+    }
+
+    hitungTotal();
+</script>
+
+</body>
+</html>
