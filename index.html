@@ -23,6 +23,7 @@
         .summary-row.total { font-size: 1.1em; font-weight: bold; color: #047857; border-top: 1px solid #a7f3d0; padding-top: 8px; margin-top: 8px; margin-bottom: 0; }
         button.btn-submit { width: 100%; background-color: #16a34a; color: white; border: none; padding: 12px; font-size: 1em; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
         button.btn-submit:hover { background-color: #15803d; }
+        button.btn-submit:disabled { background-color: #9ca3af; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -92,16 +93,16 @@
     // ============================================================
     // ⚙️ SESUAIKAN DATA KAMU DI SINI
     // ============================================================
-    const NOMOR_WA_PENJUAL = "6282118011169"; // Ganti No WA Kamu (Pakai 62)
+    const NOMOR_WA_PENJUAL = "6282118011169"; // Sesuaikan No WA Kamu
 
     // REKENING BANK KAMU
-    const REK_BCA = "1234567890 a.n. Nisa Ruffaidah";
-    const REK_CIMB = "9876543210 a.n. Nisa Ruffaidah";
+    const REK_BCA = "1234567890 a.n. Nisa";
+    const REK_CIMB = "9876543210 a.n. Nisa";
 
-    const HARGA_BIASA = 23000;              // Harga Telur Biasa
-    const HARGA_OMEGA = 28000;              // Harga Telur Omega
+    const HARGA_BIASA = 23000;              // Sesuaikan Harga Biasa
+    const HARGA_OMEGA = 28000;              // Sesuaikan Harga Omega
     
-    // TEMPELKAN Web App URL DARI GOOGLE APPS SCRIPT DI SINI:
+    // Web App URL dari Google Apps Script kamu
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTFAdUNV7obSDr1GQL7wluWLYswq5yzaLPr-yQCUPwGoGyQlQA5_9hkH8-G6n1jsRo/exec";
     // ============================================================
 
@@ -129,8 +130,10 @@
         event.preventDefault();
 
         const btn = document.getElementById('btnSubmit');
-        btn.innerText = "Memproses Pesanan...";
+        
+        // Kunci tombol biar nggak dipencet berulang kali oleh pembeli
         btn.disabled = true;
+        btn.innerText = "Pesanan Terkirim! ✅";
 
         const nama = document.getElementById('nama').value;
         const wa = document.getElementById('whatsapp').value;
@@ -140,8 +143,8 @@
 
         if (kgBiasa === 0 && kgOmega === 0) {
             alert('Silakan isi jumlah pesanan minimal 0.5 Kg untuk salah satu jenis telur.');
-            btn.innerText = "Kirim Pesanan via WhatsApp 🚀";
             btn.disabled = false;
+            btn.innerText = "Kirim Pesanan via WhatsApp 🚀";
             return;
         }
 
@@ -149,56 +152,62 @@
         const subtotalOmega = HARGA_OMEGA * kgOmega;
         const grandTotal = subtotalBiasa + subtotalOmega;
 
-        const payload = {
+        // 1. KIRIM KE GOOGLE SHEETS DENGAN 'navigator.sendBeacon' (Latar Belakang & Pasti Masuk 1x)
+        const payload = JSON.stringify({
             nama: nama,
             wa: wa,
             kgBiasa: kgBiasa,
             kgOmega: kgOmega,
             grandTotal: grandTotal,
             pembayaran: pembayaran
-        };
-
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        }).then(() => {
-            let rincianPesanan = '';
-            if (kgBiasa > 0) {
-                rincianPesanan += `• Telur Biasa: ${kgBiasa} Kg (@${formatRupiah(HARGA_BIASA)}) = ${formatRupiah(subtotalBiasa)}%0A`;
-            }
-            if (kgOmega > 0) {
-                rincianPesanan += `• Telur Omega: ${kgOmega} Kg (@${formatRupiah(HARGA_OMEGA)}) = ${formatRupiah(subtotalOmega)}%0A`;
-            }
-
-            let infoBayar = '';
-            if (pembayaran === 'BCA') {
-                infoBayar = `*Metode Pembayaran:* Transfer BCA%0A💳 No. Rekening: *${REK_BCA}*%0A%0ASaya akan segera kirim bukti transfer ke sini ya kak!`;
-            } else if (pembayaran === 'CIMB') {
-                infoBayar = `*Metode Pembayaran:* Transfer CIMB Niaga%0A💳 No. Rekening: *${REK_CIMB}*%0A%0ASaya akan segera kirim bukti transfer ke sini ya kak!`;
-            } else {
-                infoBayar = `*Metode Pembayaran:* CASH / Tunai%0A💵 Pembayaran dilakukan saat pengambilan telur.`;
-            }
-
-            const pesan = `Halo EGGSTRA, saya mau ikut PO Telur %0A%0A` +
-                          `*Data Pemesan:*%0A` +
-                          `• Nama: ${nama}%0A` +
-                          `• No WA: ${wa}%0A%0A` +
-                          `*Rincian Pesanan:*%0A` +
-                          `${rincianPesanan}%0A` +
-                          `*Total Bayar:* *${formatRupiah(grandTotal)}*%0A%0A` +
-                          `${infoBayar}`;
-
-            window.open(`https://wa.me/${NOMOR_WA_PENJUAL}?text=${pesan}`, '_blank');
-            
-            btn.innerText = "Kirim Pesanan via WhatsApp 🚀";
-            btn.disabled = false;
-        }).catch(err => {
-            alert("Terjadi kesalahan, silakan coba lagi.");
-            btn.innerText = "Kirim Pesanan via WhatsApp 🚀";
-            btn.disabled = false;
         });
+
+        if (navigator.sendBeacon) {
+            navigator.sendBeacon(GOOGLE_SCRIPT_URL, payload);
+        } else {
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: payload
+            });
+        }
+
+        // 2. BUKAKAN WHATSAPP SECARA LANGSUNG
+        let rincianPesanan = '';
+        if (kgBiasa > 0) {
+            rincianPesanan += `• Telur Biasa: ${kgBiasa} Kg (@${formatRupiah(HARGA_BIASA)}) = ${formatRupiah(subtotalBiasa)}%0A`;
+        }
+        if (kgOmega > 0) {
+            rincianPesanan += `• Telur Omega: ${kgOmega} Kg (@${formatRupiah(HARGA_OMEGA)}) = ${formatRupiah(subtotalOmega)}%0A`;
+        }
+
+        let infoBayar = '';
+        if (pembayaran === 'BCA') {
+            infoBayar = `*Metode Pembayaran:* Transfer BCA%0A💳 No. Rekening: *${REK_BCA}*%0A%0ASaya akan segera kirim bukti transfer ke sini ya kak!`;
+        } else if (pembayaran === 'CIMB') {
+            infoBayar = `*Metode Pembayaran:* Transfer CIMB Niaga%0A💳 No. Rekening: *${REK_CIMB}*%0A%0ASaya akan segera kirim bukti transfer ke sini ya kak!`;
+        } else {
+            infoBayar = `*Metode Pembayaran:* CASH / Tunai%0A💵 Pembayaran dilakukan saat pengambilan telur.`;
+        }
+
+        const pesan = `Halo EGGSTRA, saya mau ikut PO Telur %0A%0A` +
+                      `*Data Pemesan:*%0A` +
+                      `• Nama: ${nama}%0A` +
+                      `• No WA: ${wa}%0A%0A` +
+                      `*Rincian Pesanan:*%0A` +
+                      `${rincianPesanan}%0A` +
+                      `*Total Bayar:* *${formatRupiah(grandTotal)}*%0A%0A` +
+                      `${infoBayar}`;
+
+        // Langsung redirect halaman/buka tab WA tanpa keblokir pop-up
+        window.location.href = `https://wa.me/${NOMOR_WA_PENJUAL}?text=${pesan}`;
+
+        // Buka kembali tombol setelah 4 detik kalau pembeli balik lagi ke tab web
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerText = "Kirim Pesanan via WhatsApp 🚀";
+        }, 4000);
     }
 
     hitungTotal();
