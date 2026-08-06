@@ -131,11 +131,11 @@
     // ============================================================
     // ⚙️ SETTINGAN PENJUAL
     // ============================================================
-    const NOMOR_WA_PENJUAL = "6282118011169"; 
+    const NOMOR_WA_PENJUAL = "6281295317056"; 
 
-    // REKENING BANK KAMU (Sesuaikan jika perlu)
-    const REK_BCA = "1234567890 a.n. Nisa Ruffaidah";
-    const REK_CIMB = "9876543210 a.n. Nisa Ruffaidah";
+    // REKENING BANK KAMU
+    const REK_BCA = "1234567890 a.n. Nama Kamu";
+    const REK_CIMB = "9876543210 a.n. Nama Kamu";
 
     const HARGA_BIASA = 23000;              
     const HARGA_OMEGA = 28000;              
@@ -182,7 +182,6 @@
             optQris.disabled = true;
             qrisNote.style.display = 'block';
             
-            // Pindahkan otomatis ke BCA kalau total >= 500.000
             if (selectPembayaran.value === 'QRIS') {
                 selectPembayaran.value = 'BCA';
                 cekMetodeBayar();
