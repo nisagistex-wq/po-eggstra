@@ -101,10 +101,10 @@
             </div>
         </div>
 
-        <!-- CONTAINER GAMBAR QRIS OTOMATIS -->
+        <!-- CONTAINER GAMBAR QRIS -->
         <div id="boxQris" class="qris-box">
             <p style="font-size: 0.85em; font-weight: bold; color: #b45309;">Silakan Scan QRIS di bawah ini:</p>
-            <img id="imgQris" src="" alt="Kode QRIS EGGSTRA">
+            <img id="imgQris" src="https://lh3.googleusercontent.com/d/1Z0yNrHOWHkVAdnxV-TuYPPsdmeLZIIBg" alt="Kode QRIS EGGSTRA">
             <p style="font-size: 0.75em; color: #666;">Bisa pakai GoPay, OVO, Dana, ShopeePay, BCA Mobile, dll.</p>
         </div>
 
@@ -129,16 +129,13 @@
 
 <script>
     // ============================================================
-    // ⚙️ SESUAIKAN DATA KAMU DI SINI
+    // ⚙️ SETTINGAN PENJUAL
     // ============================================================
-    const NOMOR_WA_PENJUAL = "6281295317056"; 
+    const NOMOR_WA_PENJUAL = "6282118011169"; 
 
-    // TEMPELKAN LINK FOTO QRIS KAMU DI DALAM TANDA PETIK INI:
-    const LINK_GAMBAR_QRIS = "PASTE_LINK_GAMBAR_QRIS_KAMU_DI_SINI"; 
-
-    // REKENING BANK KAMU
-    const REK_BCA = "1234567890 a.n. Nama Kamu";
-    const REK_CIMB = "9876543210 a.n. Nama Kamu";
+    // REKENING BANK KAMU (Sesuaikan jika perlu)
+    const REK_BCA = "1234567890 a.n. Nisa Ruffaidah";
+    const REK_CIMB = "9876543210 a.n. Nisa Ruffaidah";
 
     const HARGA_BIASA = 23000;              
     const HARGA_OMEGA = 28000;              
@@ -176,7 +173,7 @@
         document.getElementById('detailOmega').innerText = `${kgOmega} Kg (${formatRupiah(subtotalOmega)})`;
         document.getElementById('labelTotal').innerText = formatRupiah(grandTotal);
 
-        // BATASAN QRIS (Maksimal di bawah Rp 500.000)
+        // ATURAN QRIS: Hanya bisa di bawah Rp 500.000
         const optQris = document.getElementById('optQris');
         const selectPembayaran = document.getElementById('pembayaran');
         const qrisNote = document.getElementById('qrisNote');
@@ -185,7 +182,7 @@
             optQris.disabled = true;
             qrisNote.style.display = 'block';
             
-            // Jika saat ini terpilih QRIS tapi nominal >= 500rb, otomatis pindahkan ke BCA
+            // Pindahkan otomatis ke BCA kalau total >= 500.000
             if (selectPembayaran.value === 'QRIS') {
                 selectPembayaran.value = 'BCA';
                 cekMetodeBayar();
@@ -219,7 +216,6 @@
         const subtotalOmega = HARGA_OMEGA * kgOmega;
         const grandTotal = subtotalBiasa + subtotalOmega;
 
-        // Validasi ekstra di tombol kirim
         if (pembayaran === 'QRIS' && grandTotal >= 500000) {
             alert('Pembayaran QRIS hanya berlaku untuk total di bawah Rp 500.000. Silakan pilih Transfer BCA/CIMB.');
             btn.disabled = false;
@@ -227,7 +223,7 @@
             return;
         }
 
-        // Kirim ke Google Sheets
+        // 1. Rekap Otomatis ke Google Sheets
         const payload = JSON.stringify({
             nama: nama,
             wa: "-",
@@ -248,7 +244,7 @@
             });
         }
 
-        // Buka WhatsApp
+        // 2. Format Pesan WA
         let rincianPesanan = '';
         if (kgBiasa > 0) {
             rincianPesanan += `• Telur Biasa: ${kgBiasa} Kg (@${formatRupiah(HARGA_BIASA)}) = ${formatRupiah(subtotalBiasa)}%0A`;
@@ -286,6 +282,7 @@
 
     // Jalankan awal
     hitungTotal();
+    cekMetodeBayar();
 </script>
 
 </body>
